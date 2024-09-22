@@ -64,9 +64,7 @@ const parentData: Record<"mom" | "dad", ParentInfo> = {
 };
 
 export function MeetTheParents() {
-  const [selectedParent, setSelectedParent] = useState<"mom" | "dad" | null>(
-    null
-  );
+  const [, setSelectedParent] = useState<"mom" | "dad" | null>(null);
   const [showAboutMe, setShowAboutMe] = useState(false);
 
   const handleParentSelect = (parent: "mom" | "dad") => {

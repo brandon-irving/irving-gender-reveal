@@ -11,6 +11,7 @@ export default function useVote(): [
   const updateUser = useMutation(api.users.updateUser);
 
   async function vote(user: User, vote: Gender) {
+    if (!user._id) return;
     setLoading(true);
     await updateUser({ _id: user._id, vote });
     setLoading(false);

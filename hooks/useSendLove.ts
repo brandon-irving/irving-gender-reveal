@@ -10,6 +10,7 @@ export default function useSendLove(): [
   const [loading, setLoading] = useState(false);
   const updateUser = useMutation(api.users.updateUser);
   async function sendLove(user: User, loveCount: number) {
+    if (!user._id) return;
     setLoading(true);
     await updateUser({ _id: user._id, love: loveCount + user.love });
     setLoading(false);

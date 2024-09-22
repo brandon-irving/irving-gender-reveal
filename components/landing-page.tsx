@@ -8,11 +8,13 @@ import useCreateUser from "@/hooks/useCreateUser";
 import useGetNameLoves from "@/hooks/useGetNameLoves";
 import useGetNameSuggestions from "@/hooks/useGetNameSuggestions";
 import useGetUsers from "@/hooks/useGetUsers";
+import useLocalStorage from "@/hooks/useLocalStorage";
 import useLoveName from "@/hooks/useLoveName";
 import useSendLove from "@/hooks/useSendLove";
 import useVote from "@/hooks/useVote";
 import { Gender } from "@/lib/types";
 import { Baby, Crown, Heart } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import Layout from "./ui/layout";
 
@@ -30,7 +32,7 @@ const firstNames = [
 const middleNames = ["Grace", "Rose", "Mae", "James", "Alexander", "William"];
 
 export function LandingPage() {
-  const savedName = localStorage.getItem("userName");
+  const [savedName, , initializingWindow] = useLocalStorage("userName");
   // const [savedName, , initializingWindow] = useLocalStorage("userName");
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
   const [loveCount, setLoveCount] = useState(0);
@@ -161,7 +163,7 @@ export function LandingPage() {
     return () => clearInterval(cycleNames);
   }, []);
 
-  if (isLoading) return null;
+  if (isLoading || initializingWindow) return null;
   return (
     <>
       <Layout>
@@ -223,7 +225,9 @@ export function LandingPage() {
                 >
                   <div className="flex items-center">
                     <div className="relative">
-                      <img
+                      <Image
+                        height={40}
+                        width={40}
                         src={user.avatar || "/images/mockProfile.png"}
                         alt={user.name}
                         className="w-10 h-10 rounded-full"
