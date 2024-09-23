@@ -9,12 +9,13 @@ import { useEffect } from "react";
 
 export default function Page() {
   const { user } = useUser();
-  const [convexUser, isLoadingC] = useConvexUser();
+  const [convexUser] = useConvexUser();
   const { isAuthenticated, isLoading } = useConvexAuth();
   const [handleCreateUser, isCreating] = useCreateUser();
   const router = useRouter();
+
   async function handleCreateUserAndRedirect(clerkUser: typeof user) {
-    if (!clerkUser) return;
+    if (!clerkUser || convexUser?._id) return;
     await handleCreateUser({
       clerkId: clerkUser.id,
       avatar: clerkUser.imageUrl,
@@ -22,18 +23,17 @@ export default function Page() {
       name: clerkUser.username || clerkUser.fullName || "",
     });
   }
+
   useEffect(() => {
-    if (
-      isAuthenticated &&
-      !isLoading &&
-      user &&
-      !isLoadingC &&
-      !isCreating &&
-      convexUser?._id
-    ) {
+    console.log("log: user", {
+      user,
+      isAuthenticated,
+      convexUser,
+    });
+    if (user && isAuthenticated) {
       handleCreateUserAndRedirect(user);
     }
-  }, [isLoading, isAuthenticated, user, isLoadingC]);
+  }, [user, isAuthenticated]);
 
   if (isLoading || isCreating) return null;
   if (!isAuthenticated) return router.replace("/sign-in");
