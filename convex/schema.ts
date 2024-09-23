@@ -1,6 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 export const userSchema = {
+  clerkId: v.string(),
   name: v.string(),
   love: v.number(),
   vote: v.optional(v.union(v.literal("Boy"), v.literal("Girl"))),

@@ -15,6 +15,7 @@ export type User = {
   avatar?: string;
   love: number;
   vote?: Gender;
+  clerkId: string;
 };
 
 export type NameSuggestion = {

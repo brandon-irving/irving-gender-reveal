@@ -1,6 +1,19 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
+export const getUser = query({
+  args: {
+    clerkId: v.string(),
+  },
+
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("clerkId"), args.clerkId))
+      .first();
+    return user;
+  },
+});
 export const getUsers = query({
   handler: async (ctx) => {
     const users = await ctx.db.query("users").collect();
@@ -10,6 +23,8 @@ export const getUsers = query({
 
 export const createUser = mutation({
   args: {
+    clerkId: v.string(),
+    avatar: v.optional(v.string()),
     name: v.string(),
     love: v.number(),
   },

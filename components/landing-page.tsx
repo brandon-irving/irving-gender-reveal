@@ -4,13 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import useAddNameSuggestion from "@/hooks/useAddNameSuggestion";
-import useCreateUser from "@/hooks/useCreateUser";
 import useGetNameLoves from "@/hooks/useGetNameLoves";
 import useGetNameSuggestions from "@/hooks/useGetNameSuggestions";
 import useGetUsers from "@/hooks/useGetUsers";
-import useLocalStorage from "@/hooks/useLocalStorage";
 import useLoveName from "@/hooks/useLoveName";
 import useSendLove from "@/hooks/useSendLove";
+import useUser from "@/hooks/useUser";
 import useVote from "@/hooks/useVote";
 import { Gender } from "@/lib/types";
 import { Baby, Crown, Heart } from "lucide-react";
@@ -32,8 +31,6 @@ const firstNames = [
 const middleNames = ["Grace", "Rose", "Mae", "James", "Alexander", "William"];
 
 export function LandingPage() {
-  const [savedName, , initializingWindow] = useLocalStorage("userName");
-  // const [savedName, , initializingWindow] = useLocalStorage("userName");
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
   const [loveCount, setLoveCount] = useState(0);
   const [isHeartAnimating, setIsHeartAnimating] = useState(false);
@@ -41,17 +38,15 @@ export function LandingPage() {
   const [cyclingMiddleName, setCyclingMiddleName] = useState(middleNames[0]);
   const [submitterFirstName, setSubmitterFirstName] = useState("");
   const [submitterMiddleName, setSubmitterMiddleName] = useState("");
-  const [createUser] = useCreateUser();
-  const [userName, setUserName] = useState(savedName || "");
   const [addNameSuggestion] = useAddNameSuggestion();
   const { nameSuggestions, isLoadingNameSuggestions } = useGetNameSuggestions();
   const { nameLoves } = useGetNameLoves();
-  const { user, users, isLoading } = useGetUsers(userName);
+  const [user] = useUser();
+  const { users, isLoading } = useGetUsers(user?.clerkId);
   const [sendLove, isSendingLove] = useSendLove();
   const [vote] = useVote();
   const [loveName] = useLoveName();
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(!savedName);
-
+  console.log("log: user", user);
   const { boyPercentage, girlPercentage, boyVotes, girlVotes } = useMemo(() => {
     const boyVotes = users?.filter((user) => user.vote === "Boy")?.length || 0;
     const girlVotes =
@@ -77,13 +72,6 @@ export function LandingPage() {
       .slice(0, 3);
   }, [users]);
 
-  const handleAddNameToStorage = async () => {
-    if (userName.trim() !== "") {
-      localStorage.setItem("userName", userName);
-      await createUser({ name: userName, love: 0 });
-      setIsModalOpen(false); // Close modal
-    }
-  };
   function calculateTimeLeft() {
     const difference = +new Date("2024-10-19") - +new Date();
     let timeLeft = {
@@ -127,7 +115,7 @@ export function LandingPage() {
     if (submitterFirstName.trim() !== "") {
       await addNameSuggestion({
         suggestion: submitterFirstName + " " + submitterMiddleName,
-        userNameWhoSuggested: userName,
+        userNameWhoSuggested: user?.name || "",
       });
       setSubmitterFirstName("");
       setSubmitterMiddleName("");
@@ -163,7 +151,7 @@ export function LandingPage() {
     return () => clearInterval(cycleNames);
   }, []);
 
-  if (isLoading || initializingWindow) return null;
+  if (isLoading) return null;
   return (
     <>
       <Layout>
@@ -400,7 +388,7 @@ export function LandingPage() {
         </div>
       </Layout>
       {/* Modal */}
-      {isModalOpen && (
+      {/* {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-filter backdrop-blur-lg">
           <div className="bg-white p-6 rounded-lg shadow-lg w-96">
             <h2 className="text-2xl font-bold mb-4 text-black">
@@ -424,7 +412,7 @@ export function LandingPage() {
             </button>
           </div>
         </div>
-      )}
+      )} */}
     </>
   );
 }
