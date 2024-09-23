@@ -25,11 +25,6 @@ export default function Page() {
   }
 
   useEffect(() => {
-    console.log("log: user", {
-      user,
-      isAuthenticated,
-      convexUser,
-    });
     if (user && isAuthenticated) {
       handleCreateUserAndRedirect(user);
     }

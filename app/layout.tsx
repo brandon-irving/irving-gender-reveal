@@ -28,7 +28,9 @@ export default function RootLayout({
     <html lang="en">
       <link rel="icon" href="/favicon.ico" sizes="any" />
 
-      <body>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         <ConvexClientProvider>{children}</ConvexClientProvider>
       </body>
     </html>
