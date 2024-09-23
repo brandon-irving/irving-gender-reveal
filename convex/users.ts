@@ -29,6 +29,11 @@ export const createUser = mutation({
     love: v.number(),
   },
   handler: async (ctx, args) => {
+    const isALreadyUser = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("clerkId"), args.clerkId))
+      .collect();
+    if (isALreadyUser.length) return isALreadyUser[0];
     const user = await ctx.db.insert("users", args);
     return user;
   },
