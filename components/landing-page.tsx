@@ -11,7 +11,7 @@ import useLoveName from "@/hooks/useLoveName";
 import useSendLove from "@/hooks/useSendLove";
 import useUser from "@/hooks/useUser";
 import useVote from "@/hooks/useVote";
-import { Gender } from "@/lib/types";
+import { Gender, NameLove, NameSuggestion } from "@/lib/types";
 import { Baby, Crown, Heart } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
@@ -46,7 +46,7 @@ export function LandingPage() {
   const [sendLove, isSendingLove] = useSendLove();
   const [vote] = useVote();
   const [loveName] = useLoveName();
-  console.log("log: user", user);
+
   const { boyPercentage, girlPercentage, boyVotes, girlVotes } = useMemo(() => {
     const boyVotes = users?.filter((user) => user.vote === "Boy")?.length || 0;
     const girlVotes =
@@ -206,46 +206,54 @@ export function LandingPage() {
               </Button>
             </div>
             <div className="space-y-4 overflow-scroll h-96">
-              {users?.map((user) => (
-                <div
-                  key={user._id}
-                  className="flex items-center justify-between bg-white bg-opacity-50 rounded-lg p-2"
-                >
-                  <div className="flex items-center">
-                    <div className="relative">
-                      <Image
-                        height={40}
-                        width={40}
-                        src={user.avatar || "/images/mockProfile.png"}
-                        alt={user.name}
-                        className="w-10 h-10 rounded-full"
-                      />
-                      {topThreeLoves.includes(user.love) && (
-                        <Crown
-                          className={`absolute -top-2 -right-2 w-4 h-4 ${
-                            user.love === topThreeLoves[0]
-                              ? "text-yellow-400"
-                              : user.love === topThreeLoves[1]
-                                ? "text-gray-400"
-                                : "text-yellow-600"
-                          }`}
+              {users
+                ?.sort((a, b) => b.love - a.love)
+                ?.map((user) => (
+                  <div
+                    key={user._id}
+                    className="flex items-center justify-between bg-white bg-opacity-50 rounded-lg p-2"
+                  >
+                    <div className="flex items-center">
+                      <div className="relative">
+                        <Image
+                          height={40}
+                          width={40}
+                          src={user.avatar || "/images/mockProfile.png"}
+                          alt={user.name}
+                          className="w-10 h-10 rounded-full"
                         />
-                      )}
+                        {topThreeLoves.includes(user.love) && (
+                          <Crown
+                            className={`absolute -top-2 -right-2 w-4 h-4 ${
+                              user.love === topThreeLoves[0]
+                                ? "text-yellow-400"
+                                : user.love === topThreeLoves[1]
+                                  ? "text-gray-400"
+                                  : "text-yellow-600"
+                            }`}
+                          />
+                        )}
+                      </div>
+                      <span className="ml-2 font-semibold text-black">
+                        {user.name}
+                      </span>
                     </div>
-                    <span className="ml-2 font-semibold text-black">
-                      {user.name}
-                    </span>
+                    <div className="flex items-center">
+                      <span className="mr-2 font-bold text-black">
+                        {user.love}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center">
-                    <span className="mr-2 font-bold text-black">
-                      {user.love}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
-
+          {/* Top 3 names */}
+          {!!nameSuggestions && !!nameLoves && (
+            <TopThreeNames
+              nameLoves={nameLoves}
+              nameSuggestions={nameSuggestions}
+            />
+          )}
           {/* Poll Section */}
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mb-8">
             <h2 className="text-2xl font-bold mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-blue-500">
@@ -288,7 +296,7 @@ export function LandingPage() {
                   </div>
                   <Progress value={girlPercentage} className="h-8">
                     <div
-                      className="text-black bg-pink-500 h-full transition-all flex items-center justify-end pr-2 text-white font-bold"
+                      className="text-black bg-pink-500 h-full transition-all flex items-center justify-end pr-2 font-bold"
                       style={{ width: `${girlPercentage}%` }}
                     >
                       {girlVotes} ({girlPercentage.toFixed(1)}%)
@@ -298,11 +306,22 @@ export function LandingPage() {
               </div>
             </div>
           </div>
+          {/* Name roulette */}
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl mb-8">
+            <h2 className="text-2xl font-bold mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-blue-500">
+              Need some inspiration?
+            </h2>
+            <div className="bg-gray-100 rounded-lg p-4 mb-4 h-16 flex items-center justify-center overflow-hidden">
+              <div className="text-2xl font-bold transition-all duration-1000 ease-in-out text-black">
+                {cyclingFirstName} {cyclingMiddleName} Irving
+              </div>
+            </div>
+          </div>
 
           {/* Suggest a Name Section */}
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl h-96">
-            <div className="flex flex-col md:flex-row md:space-x-6">
-              <div id="section-1" className="w-full md:w-1/2 mb-6 md:mb-0">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full h-full">
+            <div className="flex flex-col md:flex-col w-full">
+              <div id="section-1" className="w-full mb-6 md:mb-0">
                 <h2 className="text-2xl font-bold mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-blue-500">
                   Suggest a Name
                 </h2>
@@ -328,59 +347,51 @@ export function LandingPage() {
                     Submit
                   </Button>
                 </div>
-                <>
-                  <h2 className="text-2xl font-bold mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-blue-500">
-                    Need some inspiration?
-                  </h2>
-                  <div className="bg-gray-100 rounded-lg p-4 mb-4 h-16 flex items-center justify-center overflow-hidden">
-                    <div className="text-2xl font-bold transition-all duration-1000 ease-in-out text-black">
-                      {cyclingFirstName} {cyclingMiddleName} Irving
-                    </div>
-                  </div>
-                </>
               </div>
               {isLoadingNameSuggestions ? null : (
-                <div
-                  id="section-2"
-                  className="w-full md:w-1/2 max-h-60 overflow-y-auto"
-                >
-                  <h2 className="text-2xl font-bold mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-blue-500">
+                <div id="section-2" className="w-full">
+                  <h2 className="text-2xl font-bold mb-2 text-center bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-blue-500">
                     Names
                   </h2>
-                  {nameSuggestions?.map((name, index) => {
-                    const numberOfLoves =
-                      nameLoves?.filter(
-                        (love) => love.nameSuggestionId === name._id
-                      )?.length || 0;
+                  <h3 className="text-2xl font-bold mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-blue-500">
+                    Vote on the names you like!
+                  </h3>
+                  {nameSuggestions
+                    ?.sort((a, b) => b._creationTime - a._creationTime)
+                    ?.map((name, index) => {
+                      const numberOfLoves =
+                        nameLoves?.filter(
+                          (love) => love.nameSuggestionId === name._id
+                        )?.length || 0;
 
-                    return (
-                      <div
-                        key={index}
-                        className="flex justify-between items-center bg-gray-50 rounded p-2 mb-2"
-                      >
-                        <div>
-                          <span className="font-semibold text-black">
-                            {name.suggestion} Irving
-                          </span>
-                          <br />
-                          <span className="text-sm text-gray-500">
-                            by {name.userNameWhoSuggested}
-                          </span>
-                        </div>
-                        <Button
-                          onClick={() =>
-                            handleLoveName(name._id, user?._id || "")
-                          }
-                          className="bg-red-100 hover:bg-red-200 text-red-500"
+                      return (
+                        <div
+                          key={index}
+                          className="flex justify-between items-center bg-gray-50 rounded p-2 mb-2"
                         >
-                          <Heart
-                            className={`mr-1 h-4 w-4 ${numberOfLoves > 0 ? "fill-red-500" : ""} `}
-                          />
-                          {numberOfLoves}
-                        </Button>
-                      </div>
-                    );
-                  })}
+                          <div>
+                            <span className="font-semibold text-black">
+                              {name.suggestion} Irving
+                            </span>
+                            <br />
+                            <span className="text-sm text-gray-500">
+                              by {name.userNameWhoSuggested}
+                            </span>
+                          </div>
+                          <Button
+                            onClick={() =>
+                              handleLoveName(name._id, user?._id || "")
+                            }
+                            className="bg-red-100 hover:bg-red-200 text-red-500"
+                          >
+                            <Heart
+                              className={`mr-1 h-4 w-4 ${numberOfLoves > 0 ? "fill-red-500" : ""} `}
+                            />
+                            {numberOfLoves}
+                          </Button>
+                        </div>
+                      );
+                    })}
                 </div>
               )}
             </div>
@@ -416,3 +427,65 @@ export function LandingPage() {
     </>
   );
 }
+
+interface TopThreeProps {
+  nameLoves: NameLove[];
+  nameSuggestions: NameSuggestion[];
+}
+
+export const TopThreeNames: React.FC<TopThreeProps> = ({
+  nameLoves,
+  nameSuggestions,
+}) => {
+  // Find the top 3 unique highest loves
+  const topThreeNames = nameSuggestions
+    ?.sort((a, b) => {
+      const numberOfLovesA =
+        nameLoves?.filter((love) => love.nameSuggestionId === a._id)?.length ||
+        0;
+      const numberOfLovesB =
+        nameLoves?.filter((love) => love.nameSuggestionId === b._id)?.length ||
+        0;
+      return numberOfLovesB - numberOfLovesA;
+    })
+    .slice(0, 3);
+
+  return (
+    <div className="bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg shadow-lg p-6 mb-8 w-full max-w-md">
+      <h2 className="text-2xl font-bold mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-blue-500">
+        Top 3 Loved Names
+      </h2>
+      <div className="space-y-4">
+        {topThreeNames?.map((name, index) => {
+          const numberOfLovesA =
+            nameLoves?.filter((love) => love.nameSuggestionId === name._id)
+              ?.length || 0;
+          return (
+            <div
+              key={name._id}
+              className="flex items-center justify-between bg-white rounded-lg p-2"
+            >
+              <div className="flex items-center">
+                <div className="relative">
+                  <Crown
+                    className={`absolute -top-2 -right-5 w-6 h-6 ${
+                      index === 0
+                        ? "text-yellow-400"
+                        : index === 1
+                          ? "text-gray-400"
+                          : "text-yellow-600"
+                    }`}
+                  />
+                  <span className="ml-2 font-semibold text-black">
+                    {name.suggestion}
+                  </span>
+                </div>
+              </div>
+              <span className="font-bold text-black">{numberOfLovesA}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
