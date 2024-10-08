@@ -48,6 +48,12 @@ export default function RSVP() {
         setDirty(false);
       }
     }
+    if (!alreadyRsvp && name !== "") {
+      setDirty(true);
+    } else if (!alreadyRsvp && name === "") {
+      setDirty(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [response, name, alreadyRsvp]);
 
   // Handle form submission
@@ -71,7 +77,10 @@ export default function RSVP() {
     <Layout>
       <div className="min-h-screen flex flex-col items-center justify-center p-4 font-['Comic_Sans_MS',_cursive]">
         {/* Heading */}
-        <h1 className="text-4xl md:text-6xl font-extrabold text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-blue-500 whitespace-pre">
+        <h1
+          style={{ lineHeight: "3.5rem" }}
+          className="text-4xl md:text-6xl font-extrabold text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-blue-500 whitespace-pre-wrap break-words"
+        >
           {isSubmitted
             ? "Your RSVP has been updated!"
             : response === "yes" && !alreadyRsvp
