@@ -28,6 +28,7 @@ export default function Page() {
     if (user && isAuthenticated) {
       handleCreateUserAndRedirect(user);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, isAuthenticated]);
 
   if (isLoading || isCreating) return null;

@@ -20,4 +20,10 @@ export default defineSchema({
     nameSuggestionId: v.string(),
     userWhoLoved: v.string(),
   }).index("userWhoLoved", ["userWhoLoved"]),
+
+  rsvp: defineTable({
+    response: v.string(),
+    email: v.string(),
+    name: v.optional(v.string()),
+  }).index("by_email", ["email"]),
 });

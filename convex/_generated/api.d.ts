@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as nameLoves from "../nameLoves.js";
 import type * as nameSuggestions from "../nameSuggestions.js";
+import type * as rsvp from "../rsvp.js";
 import type * as users from "../users.js";
 
 /**
@@ -28,6 +29,7 @@ import type * as users from "../users.js";
 declare const fullApi: ApiFromModules<{
   nameLoves: typeof nameLoves;
   nameSuggestions: typeof nameSuggestions;
+  rsvp: typeof rsvp;
   users: typeof users;
 }>;
 export declare const api: FilterApi<
